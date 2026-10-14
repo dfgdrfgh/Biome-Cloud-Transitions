@@ -54,6 +54,7 @@ public final class LegacyWwooCloudProbe implements PreLaunchEntrypoint {
     }
     private static void check() throws Exception {
         boolean standalone=FabricLoader.getInstance().isModLoaded("biome_cloud_transitions");
+        boolean legacy=FabricLoader.getInstance().isModLoaded("wwoo");
         SharedConstants.tryDetectVersion();Bootstrap.bootStrap();RenderSystem.initRenderThread();
         var registry=new MappedRegistry<Biome>(Registries.BIOME,Lifecycle.stable());
         var sourceKey=ResourceKey.create(Registries.BIOME,ResourceLocation.parse("minecraft:desert"));
@@ -72,9 +73,10 @@ public final class LegacyWwooCloudProbe implements PreLaunchEntrypoint {
         Minecraft client=(Minecraft)unconstructed(Minecraft.class);client.level=level;
         field(Minecraft.class,GameRenderer.class,false).set(client,gameRenderer);field(Minecraft.class,Minecraft.class,true).set(null,client);
         Class<?> rendererClass=Class.forName("net.minecraft.class_761");Object renderer=unconstructed(rendererClass);
-        var tint=hook(ClientLevel.class,"wwoo$cloudColor",2);var alpha=hook(rendererClass,"wwoo$cloudAlpha",1);
-        var refresh=hook(rendererClass,"wwoo$refreshCloudAlpha",1);
-        var previousAlpha=rendererClass.getDeclaredField("wwoo$previousAlpha");previousAlpha.setAccessible(true);previousAlpha.setFloat(renderer,-1f);
+        var tint=legacy?hook(ClientLevel.class,"wwoo$cloudColor",2):null;
+        var alpha=legacy?hook(rendererClass,"wwoo$cloudAlpha",1):null;
+        var refresh=legacy?hook(rendererClass,"wwoo$refreshCloudAlpha",1):null;
+        if(legacy) {var previousAlpha=rendererClass.getDeclaredField("wwoo$previousAlpha");previousAlpha.setAccessible(true);previousAlpha.setFloat(renderer,-1f);}
         var regenerate=rendererClass.getDeclaredField("field_4107");regenerate.setAccessible(true);
         Method sample=standalone?hook(rendererClass,"wwoo$sampleCloudColor",1):null;
         Method draw=standalone?hook(rendererClass,"wwoo$tintCloudDraw",5):null;
@@ -83,9 +85,9 @@ public final class LegacyWwooCloudProbe implements PreLaunchEntrypoint {
         for(int direction:new int[]{1,-1})for(int step=0;step<=256;step++) {
             double x=direction*(-32+step*.25);position.invoke(camera,x,64d,0d);
             var callback=new CallbackInfoReturnable<Vec3>("getCloudColor",true,weather);
-            tint.invoke(level,.5f,callback);Vec3 nativeColor=callback.getReturnValue();
-            float bakedAlpha=(float)alpha.invoke(renderer,.8f);
-            regenerate.setBoolean(renderer,false);refresh.invoke(renderer,new CallbackInfo("renderClouds",false));
+            if(legacy)tint.invoke(level,.5f,callback);Vec3 nativeColor=callback.getReturnValue();
+            float bakedAlpha=legacy?(float)alpha.invoke(renderer,.8f):.8f;
+            regenerate.setBoolean(renderer,false);if(legacy)refresh.invoke(renderer,new CallbackInfo("renderClouds",false));
             if(regenerate.getBoolean(renderer))rebuilds++;
             float[] pixel;
             if(standalone) {
@@ -110,8 +112,8 @@ public final class LegacyWwooCloudProbe implements PreLaunchEntrypoint {
         }
         if(standalone) {
             require(largestStep<.02,"no instantaneous color jump from old vanilla-renderer hooks");
-            require(rebuilds==1,"old renderer rebuilds once at startup, never at biome crossings");
-            System.out.println("LEGACY_WWOO_TRANSITION_PASS: complete cloud JAR plus exact .6 hooks; native camera forward/reverse crossing; RGB follows sky kernel; alpha stable; no biome buffer rebuild; largest step="+largestStep);
+            require(rebuilds==(legacy?1:0),"no biome-triggered buffer rebuilds");
+            System.out.println((legacy?"LEGACY_WWOO_TRANSITION_PASS":"STANDALONE_TRANSITION_PASS")+": complete cloud JAR; WWOO present="+legacy+"; native camera forward/reverse crossing; RGB follows sky kernel; alpha stable; no biome buffer rebuild; largest step="+largestStep);
         } else {
             require(largestStep>.1,"control reproduces original instant cloud-color popping");
             require(rebuilds>=3,"control reproduces old biome alpha buffer rebuilds");

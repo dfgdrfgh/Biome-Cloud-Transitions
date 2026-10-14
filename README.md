@@ -1,5 +1,7 @@
 # Biome Cloud Transitions — Fabric 1.21.1
 
+WWOO is not required. The mod includes its own biome cloud palette and renders biome transitions independently, with vanilla, Sodium and Cirrus support.
+
 Java 21 and Fabric Loader 0.18.5 or newer. Cirrus 1.4.1 requires its own newer loader and dependencies.
 
 Install `biome-cloud-transitions-fabric-1.21.1-1.0.1.jar` in your client `mods` folder.
