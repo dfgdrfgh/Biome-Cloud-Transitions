@@ -97,6 +97,17 @@ public final class LegacyWwooCloudProbe implements PreLaunchEntrypoint {
                 if(call.name.contains("wwoo$cloudColor"))legacyIndex=nativeMethod.instructions.indexOf(insn);
             }
             require(captureIndex>=0&&legacyIndex>captureIndex,"native weather captured before other biome return hooks");
+            var rendererExport=new ClassNode();new ClassReader(Files.readAllBytes(Path.of(".mixin.out/class/net/minecraft/class_761.class"))).accept(rendererExport,0);
+            var build=rendererExport.methods.stream().filter(m->m.name.equals("method_3239")).findFirst().orElseThrow();
+            boolean oldAlpha=false,nativeAlphaSeen=false;int vertices=0;
+            for(var insn:build.instructions)if(insn instanceof MethodInsnNode call) {
+                if(call.name.contains("wwoo$cloudAlpha")) {require(!nativeAlphaSeen,"native alpha is applied after existing argument hooks");oldAlpha=true;}
+                if(call.name.contains("biomeclouds$nativeCloudAlpha")) {require(oldAlpha,"native alpha owns final vertex argument");nativeAlphaSeen=true;}
+                if(call.owner.equals("net/minecraft/class_4588")&&call.name.equals("method_22915")) {
+                    require(oldAlpha&&nativeAlphaSeen,"both actual alpha hooks applied before vertex upload");vertices++;oldAlpha=false;nativeAlphaSeen=false;
+                }
+            }
+            require(vertices>0,"actual vanilla cloud vertex uploads checked");
         }
         var modelView=new Matrix4f();var projection=new Matrix4f();
         double largestStep=0;int rebuilds=0;float[] previous=null;Vec3 weather=new Vec3(.7,.8,.9);
