@@ -1,4 +1,4 @@
-package com.zachminecraft.biomeclouds;
+package dev.biomecloudtransitions;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

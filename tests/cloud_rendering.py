@@ -15,19 +15,19 @@ with zipfile.ZipFile(JAR) as z:
     assert 'CirrusCloudRendererMixin' in config['client']
     assert not {'CloudColorMixin','CloudRendererAccess'} & set(config['client'])
     helpers={n:z.read(n) for n in z.namelist() if n.startswith((
-        'com/zachminecraft/biomeclouds/CloudBlend',
-        'com/zachminecraft/biomeclouds/CloudAttributes',
-        'com/zachminecraft/biomeclouds/CloudOpacity',
-        'com/zachminecraft/biomeclouds/CloudWeather',
-        'com/zachminecraft/biomeclouds/mixin/CloudWeatherMixin',
-        'com/zachminecraft/biomeclouds/mixin/CloudRendererMixin',
-        'com/zachminecraft/biomeclouds/mixin/SodiumCloudRendererMixin',
-        'com/zachminecraft/biomeclouds/mixin/CirrusCloudRendererMixin',
-        'com/zachminecraft/biomeclouds/mixin/CirrusShaderProgramMixin'))}
+        'dev/biomecloudtransitions/CloudBlend',
+        'dev/biomecloudtransitions/CloudAttributes',
+        'dev/biomecloudtransitions/CloudOpacity',
+        'dev/biomecloudtransitions/CloudWeather',
+        'dev/biomecloudtransitions/mixin/CloudWeatherMixin',
+        'dev/biomecloudtransitions/mixin/CloudRendererMixin',
+        'dev/biomecloudtransitions/mixin/SodiumCloudRendererMixin',
+        'dev/biomecloudtransitions/mixin/CirrusCloudRendererMixin',
+        'dev/biomecloudtransitions/mixin/CirrusShaderProgramMixin'))}
     attributes=z.read('data/biome_cloud_transitions/biome_attributes.json')
     biome_attributes=json.loads(attributes)
     opacity_palettes=json.loads((ROOT/'tests/fixtures/cloud-probe-palettes.json').read_text())
-    assert 'com/zachminecraft/biomeclouds/CloudTint.class' not in z.namelist()
+    assert 'dev/biomecloudtransitions/CloudTint.class' not in z.namelist()
     assert not any('CloudRenderProbe' in n for n in z.namelist())
 
 manifest=json.load(urllib.request.urlopen('https://piston-meta.mojang.com/mc/game/version_manifest_v2.json'))
@@ -52,10 +52,10 @@ classes=folder/'classes';classes.mkdir()
 cp=os.pathsep.join([str(JAR),str(ROOT/'minecraft-client-named.jar'),
     (ROOT/'test-runtime/launch-classpath.txt').read_text(),*client_libraries])
 subprocess.run([str(JAVA/'javac'),'-proc:none','--release','21','-cp',cp,'-d',str(classes),
-    str(ROOT/'tests/com/zachminecraft/biomeclouds/CloudRenderProbe.java'),
-    str(ROOT/'tests/com/zachminecraft/biomeclouds/CloudBlendCheck.java'),
-    str(ROOT/'tests/com/zachminecraft/biomeclouds/SodiumCloudRenderProbe.java'),
-    str(ROOT/'tests/com/zachminecraft/biomeclouds/CirrusCloudRenderProbe.java')],check=True)
+    str(ROOT/'tests/dev/biomecloudtransitions/CloudRenderProbe.java'),
+    str(ROOT/'tests/dev/biomecloudtransitions/CloudBlendCheck.java'),
+    str(ROOT/'tests/dev/biomecloudtransitions/SodiumCloudRenderProbe.java'),
+    str(ROOT/'tests/dev/biomecloudtransitions/CirrusCloudRenderProbe.java')],check=True)
 raw=folder/'probe-named.jar'
 with zipfile.ZipFile(raw,'w',zipfile.ZIP_DEFLATED) as z:
     for p in classes.rglob('*.class'):z.write(p,p.relative_to(classes))
@@ -73,10 +73,10 @@ def fixture(entrypoint):
         z.writestr('data/biome_cloud_transitions/biome_attributes.json',attributes)
         z.writestr('cloud-probe-palettes.json',json.dumps(opacity_palettes))
         z.writestr('fabric.mod.json',json.dumps({'schemaVersion':1,'id':'biome_cloud_transitions','version':release_version,
-            'environment':'client','entrypoints':{'preLaunch':['com.zachminecraft.biomeclouds.'+entrypoint]},
+            'environment':'client','entrypoints':{'preLaunch':['dev.biomecloudtransitions.'+entrypoint]},
             'mixins':['cloud-probe.mixins.json']}))
         z.writestr('cloud-probe.mixins.json',json.dumps({'required':True,
-            'package':'com.zachminecraft.biomeclouds.mixin','compatibilityLevel':'JAVA_21',
+            'package':'dev.biomecloudtransitions.mixin','compatibilityLevel':'JAVA_21',
             'client':['CloudRendererMixin','SodiumCloudRendererMixin','CirrusCloudRendererMixin','CirrusShaderProgramMixin','CloudWeatherMixin'],'injectors':{'defaultRequire':1}}))
 launch_cp=os.pathsep.join([(ROOT/'test-runtime/launch-classpath.txt').read_text(),
     str(ROOT/'toolchain/lib/intermediary.jar'),*client_libraries])

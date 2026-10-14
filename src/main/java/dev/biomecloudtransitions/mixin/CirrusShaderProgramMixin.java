@@ -1,6 +1,6 @@
-package com.zachminecraft.biomeclouds.mixin;
+package dev.biomecloudtransitions.mixin;
 
-import com.zachminecraft.biomeclouds.CloudOpacity;
+import dev.biomecloudtransitions.CloudOpacity;
 import net.minecraft.server.packs.resources.ResourceProvider;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;

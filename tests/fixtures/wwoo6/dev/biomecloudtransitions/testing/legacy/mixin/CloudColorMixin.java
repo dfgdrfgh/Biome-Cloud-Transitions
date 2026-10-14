@@ -1,6 +1,6 @@
-package com.zachminecraft.wwoocontent.mixin;
+package dev.biomecloudtransitions.testing.legacy.mixin;
 
-import com.zachminecraft.wwoocontent.CloudAttributes;
+import dev.biomecloudtransitions.testing.legacy.CloudAttributes;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;

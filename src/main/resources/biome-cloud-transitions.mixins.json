@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "com.zachminecraft.biomeclouds.mixin",
+  "package": "dev.biomecloudtransitions.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
     "CloudRendererMixin",

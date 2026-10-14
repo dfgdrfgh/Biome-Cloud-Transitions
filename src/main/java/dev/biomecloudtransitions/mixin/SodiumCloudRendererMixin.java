@@ -1,9 +1,9 @@
-package com.zachminecraft.biomeclouds.mixin;
+package dev.biomecloudtransitions.mixin;
 
-import com.zachminecraft.biomeclouds.CloudAttributes;
+import dev.biomecloudtransitions.CloudAttributes;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.zachminecraft.biomeclouds.CloudBlend;
-import com.zachminecraft.biomeclouds.CloudWeather;
+import dev.biomecloudtransitions.CloudBlend;
+import dev.biomecloudtransitions.CloudWeather;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;

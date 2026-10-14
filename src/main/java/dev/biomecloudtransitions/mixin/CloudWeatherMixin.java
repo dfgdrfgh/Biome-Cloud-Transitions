@@ -1,6 +1,6 @@
-package com.zachminecraft.biomeclouds.mixin;
+package dev.biomecloudtransitions.mixin;
 
-import com.zachminecraft.biomeclouds.CloudWeather;
+import dev.biomecloudtransitions.CloudWeather;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.phys.Vec3;

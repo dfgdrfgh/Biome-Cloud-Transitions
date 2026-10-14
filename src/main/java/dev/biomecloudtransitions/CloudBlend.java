@@ -1,4 +1,4 @@
-package com.zachminecraft.biomeclouds;
+package dev.biomecloudtransitions;
 
 import net.minecraft.util.CubicSampler;
 import net.minecraft.world.phys.Vec3;

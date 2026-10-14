@@ -1,4 +1,4 @@
-package com.zachminecraft.biomeclouds;
+package dev.biomecloudtransitions;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.mojang.blaze3d.systems.RenderSystem;

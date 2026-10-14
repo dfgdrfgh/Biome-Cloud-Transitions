@@ -1,10 +1,10 @@
-package com.zachminecraft.biomeclouds.mixin;
+package dev.biomecloudtransitions.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.zachminecraft.biomeclouds.CloudAttributes;
-import com.zachminecraft.biomeclouds.CloudBlend;
-import com.zachminecraft.biomeclouds.CloudWeather;
-import com.zachminecraft.biomeclouds.CloudOpacity;
+import dev.biomecloudtransitions.CloudAttributes;
+import dev.biomecloudtransitions.CloudBlend;
+import dev.biomecloudtransitions.CloudWeather;
+import dev.biomecloudtransitions.CloudOpacity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.joml.Matrix4f;

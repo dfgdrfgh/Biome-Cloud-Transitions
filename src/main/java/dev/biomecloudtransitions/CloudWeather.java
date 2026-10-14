@@ -1,4 +1,4 @@
-package com.zachminecraft.biomeclouds;
+package dev.biomecloudtransitions;
 
 import net.minecraft.client.Minecraft;
 import java.lang.ref.WeakReference;

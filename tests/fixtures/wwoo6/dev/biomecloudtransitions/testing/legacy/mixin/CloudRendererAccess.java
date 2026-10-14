@@ -1,4 +1,4 @@
-package com.zachminecraft.wwoocontent.mixin;
+package dev.biomecloudtransitions.testing.legacy.mixin;
 
 import net.minecraft.client.renderer.LevelRenderer;
 import org.spongepowered.asm.mixin.Mixin;

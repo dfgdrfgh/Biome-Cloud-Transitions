@@ -1,6 +1,6 @@
-package com.zachminecraft.wwoocontent.mixin;
+package dev.biomecloudtransitions.testing.legacy.mixin;
 
-import com.zachminecraft.wwoocontent.CloudAttributes;
+import dev.biomecloudtransitions.testing.legacy.CloudAttributes;
 import net.minecraft.client.renderer.LevelRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;

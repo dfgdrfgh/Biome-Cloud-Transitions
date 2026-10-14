@@ -1,4 +1,4 @@
-package com.zachminecraft.wwoocontent;
+package dev.biomecloudtransitions.testing.legacy;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

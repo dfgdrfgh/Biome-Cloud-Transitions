@@ -4,7 +4,7 @@ import zipfile,json
 ROOT=Path(__file__).resolve().parent.parent
 JAR=ROOT/'biome-cloud-transitions-fabric-1.21.1-1.0.1.jar'
 with zipfile.ZipFile(JAR) as z:
-    assert 'com/zachminecraft/biomeclouds/CloudBlend.class' in z.namelist()
+    assert 'dev/biomecloudtransitions/CloudBlend.class' in z.namelist()
     assert not any('CloudBlendCheck' in n for n in z.namelist())
     # Preserve encoded biome data; rendering uses RGB without animating its opacity.
     attributes=json.loads(z.read('data/biome_cloud_transitions/biome_attributes.json'))

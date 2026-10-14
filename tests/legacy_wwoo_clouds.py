@@ -10,7 +10,7 @@ client_libraries=[str(p.resolve()) for p in (ROOT/'test-runtime/libraries').rglo
 cp=os.pathsep.join([str(ROOT/'minecraft-client-named.jar'),(ROOT/'test-runtime/launch-classpath.txt').read_text(),*client_libraries])
 classes=folder/'classes';classes.mkdir()
 sources=[str(p) for p in (ROOT/'tests/fixtures/wwoo6').rglob('*.java')]
-sources.append(str(ROOT/'tests/com/zachminecraft/biomeclouds/LegacyWwooCloudProbe.java'))
+sources.append(str(ROOT/'tests/dev/biomecloudtransitions/LegacyWwooCloudProbe.java'))
 subprocess.run([str(JAVA/'javac'),'-proc:none','--release','21','-cp',cp,'-d',str(classes),*sources],check=True)
 raw=folder/'fixture-named.jar'
 with zipfile.ZipFile(raw,'w',zipfile.ZIP_DEFLATED) as z:
@@ -26,17 +26,17 @@ with zipfile.ZipFile(inter) as z:
 with zipfile.ZipFile(JAR) as z:attributes=z.read('data/biome_cloud_transitions/biome_attributes.json')
 with zipfile.ZipFile(folder/'mods/legacy-wwoo.jar','w',zipfile.ZIP_DEFLATED) as z:
     for n,v in entries.items():
-        if n.startswith('com/zachminecraft/wwoocontent/'):z.writestr(n,v)
+        if n.startswith('dev/biomecloudtransitions/testing/legacy/'):z.writestr(n,v)
     z.writestr('data/wwoocontent/biome_attributes.json',attributes)
     z.writestr('fabric.mod.json',json.dumps({'schemaVersion':1,'id':'wwoo','version':'3.0.1+backport.1.21.1.6',
         'environment':'client','mixins':['legacy-wwoo.mixins.json']}))
-    z.writestr('legacy-wwoo.mixins.json',json.dumps({'required':True,'package':'com.zachminecraft.wwoocontent.mixin',
+    z.writestr('legacy-wwoo.mixins.json',json.dumps({'required':True,'package':'dev.biomecloudtransitions.testing.legacy.mixin',
         'compatibilityLevel':'JAVA_21','client':['CloudColorMixin','CloudRendererAccess','CloudRendererMixin'],'injectors':{'defaultRequire':1}}))
 with zipfile.ZipFile(folder/'mods/legacy-probe.jar','w',zipfile.ZIP_DEFLATED) as z:
     for n,v in entries.items():
-        if n.startswith('com/zachminecraft/biomeclouds/LegacyWwooCloudProbe'):z.writestr(n,v)
+        if n.startswith('dev/biomecloudtransitions/LegacyWwooCloudProbe'):z.writestr(n,v)
     z.writestr('fabric.mod.json',json.dumps({'schemaVersion':1,'id':'legacy_cloud_probe','version':'1','environment':'client',
-        'entrypoints':{'preLaunch':['com.zachminecraft.biomeclouds.LegacyWwooCloudProbe']}}))
+        'entrypoints':{'preLaunch':['dev.biomecloudtransitions.LegacyWwooCloudProbe']}}))
 launch_cp=os.pathsep.join([(ROOT/'test-runtime/launch-classpath.txt').read_text(),str(ROOT/'toolchain/lib/intermediary.jar'),*client_libraries])
 command=[str(JAVA/'java'),'-Xmx2G','-Dmixin.debug.export=true','-Dfabric.gameJarPath='+str(ROOT/'toolchain/client-1.21.1.jar'),
     '-cp',launch_cp,'net.fabricmc.loader.impl.launch.knot.KnotClient']
