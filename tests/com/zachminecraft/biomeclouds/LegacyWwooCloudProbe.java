@@ -85,7 +85,7 @@ public final class LegacyWwooCloudProbe implements PreLaunchEntrypoint {
         var regenerate=rendererClass.getDeclaredField("field_4107");regenerate.setAccessible(true);
         Method sample=standalone?hook(rendererClass,"wwoo$sampleCloudColor",1):null;
         Method draw=standalone?hook(rendererClass,"wwoo$tintCloudDraw",5):null;
-        Method capture=standalone?hook(ClientLevel.class,"biomeclouds$rememberWeather",2):null;
+        Method capture=standalone?hook(ClientLevel.class,"biomeclouds$rememberWeather",1):null;
         Method nativeColorHook=standalone?hook(rendererClass,"biomeclouds$nativeWeatherColor",1):null;
         Method nativeAlpha=standalone?hook(rendererClass,"biomeclouds$nativeCloudAlpha",1):null;
         if(standalone&&legacy) {
@@ -104,7 +104,7 @@ public final class LegacyWwooCloudProbe implements PreLaunchEntrypoint {
             double x=direction*(-32+step*.25);position.invoke(camera,x,64d,0d);
             if(standalone)sample.invoke(renderer,new CallbackInfo("renderClouds",false));
             var callback=new CallbackInfoReturnable<Vec3>("getCloudColor",true,weather);
-            if(standalone)capture.invoke(level,.5f,callback);
+            if(standalone)capture.invoke(level,weather);
             if(legacy)tint.invoke(level,.5f,callback);Vec3 nativeColor=callback.getReturnValue();
             if(standalone)nativeColor=(Vec3)nativeColorHook.invoke(renderer,nativeColor);
             float bakedAlpha=legacy?(float)alpha.invoke(renderer,.8f):.8f;
