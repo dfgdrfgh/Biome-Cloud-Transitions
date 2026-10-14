@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "com.zachminecraft.biomeclouds.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "CloudRendererMixin",
+    "SodiumCloudRendererMixin",
+    "CirrusCloudRendererMixin",
+    "CirrusShaderProgramMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "minecraft:badlands": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#22ffffff"
+    }
+  },
+  "minecraft:dark_forest": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#66888899"
+    }
+  },
+  "minecraft:deep_frozen_ocean": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#11ffffff"
+    }
+  },
+  "minecraft:desert": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#11ffffff"
+    }
+  },
+  "minecraft:eroded_badlands": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#22ffffff"
+    }
+  },
+  "minecraft:flower_forest": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#33ffffff"
+    }
+  },
+  "minecraft:frozen_ocean": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#11ffffff"
+    }
+  },
+  "minecraft:frozen_peaks": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#11ffffff"
+    }
+  },
+  "minecraft:frozen_river": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#66ffffff"
+    }
+  },
+  "minecraft:jagged_peaks": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#11ffffff"
+    }
+  },
+  "minecraft:pale_garden": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#66828282"
+    }
+  },
+  "minecraft:savanna": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#33ffffff"
+    }
+  },
+  "minecraft:savanna_plateau": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#33ffffff"
+    }
+  },
+  "minecraft:snowy_beach": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#66ffffff"
+    }
+  },
+  "minecraft:snowy_plains": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#20ffffff"
+    }
+  },
+  "minecraft:snowy_slopes": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#11ffffff"
+    }
+  },
+  "minecraft:snowy_taiga": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#11ffffff"
+    }
+  },
+  "minecraft:stony_peaks": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#66ffffff"
+    }
+  },
+  "minecraft:sunflower_plains": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#33ffffff"
+    }
+  },
+  "minecraft:warm_ocean": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#11ffffff"
+    }
+  },
+  "minecraft:windswept_forest": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#33ffffff"
+    }
+  },
+  "minecraft:wooded_badlands": {
+    "attributes": {
+      "minecraft:visual/cloud_color": "#22ffffff"
+    }
+  }
+}

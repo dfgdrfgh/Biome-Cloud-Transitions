@@ -1,0 +1,10 @@
+Biome Cloud Transitions 1.0.0
+
+Extracted from the user's WWOO 3.0.1 Fabric 1.21.1 backport build .16.
+Cloud transition/renderer/opacity helper code is separated from WWOO's world generation.
+Biome cloud palette values originate in William Wythers' Overhauled Overworld.
+Original authors: William Wythers and Cristelknight.
+Original project: https://modrinth.com/mod/wwoo
+The upstream WWOO metadata specifies CC BY-NC-ND 4.0.
+This extraction does not grant additional rights to the upstream palette or other upstream content.
+No WWOO world generation, original mod classes, or third-party mod binaries are included.

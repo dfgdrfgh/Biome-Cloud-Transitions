@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "biome_cloud_transitions",
+  "version": "1.0.0",
+  "name": "Biome Cloud Transitions",
+  "description": "Spatial biome cloud RGB blending with vanilla, Sodium and Cirrus support; preserves Cirrus Fast opacity.",
+  "environment": "client",
+  "depends": {
+    "fabricloader": ">=0.18.5",
+    "minecraft": "~1.21.1",
+    "java": ">=21"
+  },
+  "mixins": [
+    "biome-cloud-transitions.mixins.json"
+  ]
+}
