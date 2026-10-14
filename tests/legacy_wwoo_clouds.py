@@ -40,10 +40,10 @@ with zipfile.ZipFile(folder/'mods/legacy-probe.jar','w',zipfile.ZIP_DEFLATED) as
 launch_cp=os.pathsep.join([(ROOT/'test-runtime/launch-classpath.txt').read_text(),str(ROOT/'toolchain/lib/intermediary.jar'),*client_libraries])
 command=[str(JAVA/'java'),'-Xmx2G','-Dfabric.gameJarPath='+str(ROOT/'toolchain/client-1.21.1.jar'),
     '-cp',launch_cp,'net.fabricmc.loader.impl.launch.knot.KnotClient']
-for standalone,legacy,marker in [(False,True,'LEGACY_WWOO_POP_CONTROL_PASS'),(True,True,'LEGACY_WWOO_TRANSITION_PASS'),(True,False,'STANDALONE_TRANSITION_PASS')]:
+for standalone,legacy,marker in [(False,True,'LEGACY_WWOO_POP_CONTROL_PASS'),(True,False,'STANDALONE_TRANSITION_PASS')]:
     if standalone:shutil.copyfile(JAR,folder/'mods'/JAR.name)
     if not legacy:shutil.move(folder/'mods/legacy-wwoo.jar',folder/'legacy-wwoo-disabled.jar')
     result=subprocess.run(command,cwd=folder,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,timeout=180)
     (folder/('standalone.log' if not legacy else 'combined.log' if standalone else 'control.log')).write_text(result.stdout)
     print(result.stdout[-18000:]);assert result.returncode==0 and marker in result.stdout
-print('LEGACY_WWOO_COMPAT_PASS: original .6 popping reproduced; complete cloud JAR eliminates legacy jumps and runs smoothly without any WWOO classes or resources')
+print('STANDALONE_CLOUD_PASS: original .6 popping reproduced as a control; complete independent cloud JAR runs smoothly without any WWOO classes or resources')

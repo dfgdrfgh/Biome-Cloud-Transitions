@@ -10,7 +10,7 @@ Cloud RGB uses Minecraft's sky biome sampling weights at the actual camera posit
 
 Vanilla, Sodium 0.8.13 and Cirrus 1.4.1 use the same cloud palette. Optional renderer integrations are enabled only when their target classes exist. Cirrus keeps its time, weather and lighting tint. Fast layers retain their configured opacity near the sun; Fancy retains native Cirrus behavior. The opacity patch applies to Cirrus's native shader. Shader-pack replacements are outside that patch.
 
-Version 1.0.1 supports the reference WWOO backport `.6` build. Its old instant tint and biome alpha hooks are neutralized while this mod is installed, so cloud-buffer rebuilds and native biome tint cannot override the spatial cloud transition. The original vanilla weather/time shading and default cloud alpha are retained. WWOO `.19` also remains supported. Replace the old cloud JAR; do not keep both cloud versions installed.
+Version 1.0.1 contains no WWOO-specific runtime patch. The complete JAR is tested independently of WWOO, using the native camera, biome manager and cloud draw hook across forward/reverse biome crossings. Older WWOO builds such as `.6` contain separate instant biome tint/alpha hooks; use the standalone mod by itself when testing its transitions. The newer `.19` WWOO build already yields its cloud hooks to this mod. Replace the old cloud JAR; do not keep both cloud versions installed.
 
 ## Build locally
 
