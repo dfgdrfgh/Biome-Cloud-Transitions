@@ -32,14 +32,15 @@ jobs:
           sudo apt-get install -y xvfb libgl1-mesa-dri
       - name: Check palette and vanilla, Sodium and Cirrus renderers
         run: |
-          python3 -m zipfile -t biome-cloud-transitions-fabric-1.21.1-1.0.0.jar
+          python3 -m zipfile -t biome-cloud-transitions-fabric-1.21.1-1.0.1.jar
           python3 tests/cloud_blending.py
           python3 tests/cloud_rendering.py
+          python3 tests/legacy_wwoo_clouds.py
       - name: Upload installable mod JAR
         uses: actions/upload-artifact@v4
         with:
           name: Biome-Cloud-Transitions-Fabric-1.21.1
-          path: biome-cloud-transitions-fabric-1.21.1-1.0.0.jar
+          path: biome-cloud-transitions-fabric-1.21.1-1.0.1.jar
           if-no-files-found: error
           retention-days: 30
       - name: Upload renderer logs if validation fails
@@ -49,3 +50,4 @@ jobs:
           name: Cloud-renderer-test-logs
           path: test-cloud-rendering/*.log
           if-no-files-found: ignore
+

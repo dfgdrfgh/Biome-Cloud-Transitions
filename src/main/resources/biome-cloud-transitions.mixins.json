@@ -6,9 +6,11 @@
     "CloudRendererMixin",
     "SodiumCloudRendererMixin",
     "CirrusCloudRendererMixin",
-    "CirrusShaderProgramMixin"
+    "CirrusShaderProgramMixin",
+    "LegacyWwooCloudAttributesMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   }
 }
+
