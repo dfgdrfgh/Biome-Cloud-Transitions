@@ -22,7 +22,7 @@ The bootstrap downloads public Minecraft/Fabric dependencies and mappings; Minec
 
 ## Upload to GitHub
 
-Upload the contents of this directory, including `.github/workflows/build.yml`, to your repository's `main` branch. The included workflow compiles the core JAR and optional diagnostic, tests actual vanilla/Sodium/Cirrus renderer hooks and shader output on software OpenGL, then uploads separate JAR artifacts. You can also start it under Actions → Build Biome Cloud Transitions → Run workflow.
+Upload the contents of this directory, including `.github/workflows/build.yml`, to your repository's `main` branch. The workflow compiles the standalone cloud JAR, tests actual vanilla/Sodium/Cirrus renderer hooks and shader output on software OpenGL, then uploads the installable JAR under the run's Artifacts section. You can also start it under Actions → Build Biome Cloud Transitions → Run workflow.
 
 ## Validation of the supplied JAR
 

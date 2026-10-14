@@ -47,7 +47,7 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
     client_libraries=list(pool.map(download,artifacts))
 
 classes=folder/'classes';classes.mkdir()
-cp=os.pathsep.join([str(JAR),str(ROOT/'minecraft-client-named.jar'),str(ROOT/'diagnostics/build/diagnostic-named.jar'),str(ROOT/'diagnostics/build/fabric-api-named.jar'),
+cp=os.pathsep.join([str(JAR),str(ROOT/'minecraft-client-named.jar'),
     (ROOT/'test-runtime/launch-classpath.txt').read_text(),*client_libraries])
 subprocess.run([str(JAVA/'javac'),'-proc:none','--release','21','-cp',cp,'-d',str(classes),
     str(ROOT/'tests/com/zachminecraft/biomeclouds/CloudRenderProbe.java'),
@@ -89,7 +89,6 @@ def run(command,marker,name):
     if name=='vanilla':assert 'CLOUD_SKY_BLEND_PASS' in result.stdout
     if name=='cirrus':
         assert 'CIRRUS_OPACITY_COMPOSITE_PASS' in result.stdout
-        assert 'CLOUD_DIAGNOSTIC_PASS' in result.stdout
         assert 'CIRRUS_FAST_OPACITY_PASS' in result.stdout
 fixture('CloudRenderProbe')
 run(command,'CLOUD_RENDER_PASS','vanilla')
@@ -145,7 +144,6 @@ old_cp=[p for p in launch_cp.split(os.pathsep) if not any(token in p for token i
     ('fabric-loader.jar','sponge-mixin/','/org/ow2/asm/','/toolchain/lib/asm'))]
 cirrus_command=[*command]
 cirrus_command[cirrus_command.index('-cp')+1]=os.pathsep.join([*loader_cp,*old_cp])
-shutil.copyfile(ROOT/'wwoo-cloud-diagnostics-fabric-1.21.1.jar',folder/'mods/wwoo-cloud-diagnostics-fabric-1.21.1.jar')
 fixture('CirrusCloudRenderProbe')
 run(['xvfb-run','-a',*cirrus_command],'CIRRUS_CLOUD_RENDER_PASS','cirrus')
 
