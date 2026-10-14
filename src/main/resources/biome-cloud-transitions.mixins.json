@@ -6,9 +6,11 @@
     "CloudRendererMixin",
     "SodiumCloudRendererMixin",
     "CirrusCloudRendererMixin",
-    "CirrusShaderProgramMixin"
+    "CirrusShaderProgramMixin",
+    "CloudWeatherMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   }
 }
+

@@ -18,6 +18,8 @@ with zipfile.ZipFile(JAR) as z:
         'com/zachminecraft/biomeclouds/CloudBlend',
         'com/zachminecraft/biomeclouds/CloudAttributes',
         'com/zachminecraft/biomeclouds/CloudOpacity',
+        'com/zachminecraft/biomeclouds/CloudWeather',
+        'com/zachminecraft/biomeclouds/mixin/CloudWeatherMixin',
         'com/zachminecraft/biomeclouds/mixin/CloudRendererMixin',
         'com/zachminecraft/biomeclouds/mixin/SodiumCloudRendererMixin',
         'com/zachminecraft/biomeclouds/mixin/CirrusCloudRendererMixin',
@@ -75,7 +77,7 @@ def fixture(entrypoint):
             'mixins':['cloud-probe.mixins.json']}))
         z.writestr('cloud-probe.mixins.json',json.dumps({'required':True,
             'package':'com.zachminecraft.biomeclouds.mixin','compatibilityLevel':'JAVA_21',
-            'client':['CloudRendererMixin','SodiumCloudRendererMixin','CirrusCloudRendererMixin','CirrusShaderProgramMixin'],'injectors':{'defaultRequire':1}}))
+            'client':['CloudRendererMixin','SodiumCloudRendererMixin','CirrusCloudRendererMixin','CirrusShaderProgramMixin','CloudWeatherMixin'],'injectors':{'defaultRequire':1}}))
 launch_cp=os.pathsep.join([(ROOT/'test-runtime/launch-classpath.txt').read_text(),
     str(ROOT/'toolchain/lib/intermediary.jar'),*client_libraries])
 command=[str(JAVA/'java'),'-Xmx2G','-Dmixin.debug.export=true',

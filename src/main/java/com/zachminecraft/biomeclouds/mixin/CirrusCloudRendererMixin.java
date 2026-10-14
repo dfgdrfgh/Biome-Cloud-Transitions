@@ -3,6 +3,7 @@ package com.zachminecraft.biomeclouds.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.zachminecraft.biomeclouds.CloudAttributes;
 import com.zachminecraft.biomeclouds.CloudBlend;
+import com.zachminecraft.biomeclouds.CloudWeather;
 import com.zachminecraft.biomeclouds.CloudOpacity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.ShaderInstance;
@@ -26,6 +27,7 @@ public abstract class CirrusCloudRendererMixin {
 
     @Inject(method="render", at=@At("HEAD"), remap=false)
     private void wwoo$sampleCloudColor(CallbackInfo ci) {
+        CloudWeather.beginFrame();
         wwoo$frameColor = CloudAttributes.color();
     }
 
@@ -53,4 +55,11 @@ public abstract class CirrusCloudRendererMixin {
         if(uniform!=null)uniform.set(wwoo$fastOpacity?1.0f:0.0f);
         return shader;
     }
+
+    @ModifyExpressionValue(method="render",at=@At(value="INVOKE",
+        target="Lnet/minecraft/class_638;method_23785(F)Lnet/minecraft/class_243;",remap=false),remap=false)
+    private Vec3 biomeclouds$nativeWeatherColor(Vec3 original) {
+        return CloudWeather.original(original);
+    }
 }
+

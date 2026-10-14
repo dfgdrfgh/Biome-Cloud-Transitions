@@ -1,7 +1,10 @@
 package com.zachminecraft.biomeclouds.mixin;
 
 import com.zachminecraft.biomeclouds.CloudAttributes;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.zachminecraft.biomeclouds.CloudBlend;
+import com.zachminecraft.biomeclouds.CloudWeather;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Unique;
@@ -19,6 +22,7 @@ public abstract class SodiumCloudRendererMixin {
 
     @Inject(method="render", at=@At("HEAD"), remap=false)
     private void wwoo$sampleCloudColor(CallbackInfo ci) {
+        CloudWeather.beginFrame();
         wwoo$frameColor = CloudAttributes.color();
     }
 
@@ -32,4 +36,11 @@ public abstract class SodiumCloudRendererMixin {
         args.set(2, (float)args.get(2) * (float)color.blue());
         // Keep Sodium's opacity and its later white shader-state reset unchanged.
     }
+
+    @ModifyExpressionValue(method="render",at=@At(value="INVOKE",
+        target="Lnet/minecraft/class_638;method_23785(F)Lnet/minecraft/class_243;",remap=false),remap=false)
+    private Vec3 biomeclouds$nativeWeatherColor(Vec3 original) {
+        return CloudWeather.original(original);
+    }
 }
+

@@ -7,6 +7,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.minecraft.SharedConstants;
@@ -80,13 +85,30 @@ public final class LegacyWwooCloudProbe implements PreLaunchEntrypoint {
         var regenerate=rendererClass.getDeclaredField("field_4107");regenerate.setAccessible(true);
         Method sample=standalone?hook(rendererClass,"wwoo$sampleCloudColor",1):null;
         Method draw=standalone?hook(rendererClass,"wwoo$tintCloudDraw",5):null;
+        Method capture=standalone?hook(ClientLevel.class,"biomeclouds$rememberWeather",2):null;
+        Method nativeColorHook=standalone?hook(rendererClass,"biomeclouds$nativeWeatherColor",1):null;
+        Method nativeAlpha=standalone?hook(rendererClass,"biomeclouds$nativeCloudAlpha",1):null;
+        if(standalone&&legacy) {
+            var exported=new ClassNode();new ClassReader(Files.readAllBytes(Path.of(".mixin.out/class/net/minecraft/class_638.class"))).accept(exported,0);
+            var nativeMethod=exported.methods.stream().filter(m->m.name.equals("method_23785")).findFirst().orElseThrow();
+            int captureIndex=-1,legacyIndex=-1;
+            for(var insn:nativeMethod.instructions)if(insn instanceof MethodInsnNode call) {
+                if(call.name.contains("biomeclouds$rememberWeather"))captureIndex=nativeMethod.instructions.indexOf(insn);
+                if(call.name.contains("wwoo$cloudColor"))legacyIndex=nativeMethod.instructions.indexOf(insn);
+            }
+            require(captureIndex>=0&&legacyIndex>captureIndex,"native weather captured before other biome return hooks");
+        }
         var modelView=new Matrix4f();var projection=new Matrix4f();
         double largestStep=0;int rebuilds=0;float[] previous=null;Vec3 weather=new Vec3(.7,.8,.9);
         for(int direction:new int[]{1,-1})for(int step=0;step<=256;step++) {
             double x=direction*(-32+step*.25);position.invoke(camera,x,64d,0d);
+            if(standalone)sample.invoke(renderer,new CallbackInfo("renderClouds",false));
             var callback=new CallbackInfoReturnable<Vec3>("getCloudColor",true,weather);
+            if(standalone)capture.invoke(level,.5f,callback);
             if(legacy)tint.invoke(level,.5f,callback);Vec3 nativeColor=callback.getReturnValue();
+            if(standalone)nativeColor=(Vec3)nativeColorHook.invoke(renderer,nativeColor);
             float bakedAlpha=legacy?(float)alpha.invoke(renderer,.8f):.8f;
+            if(standalone)bakedAlpha=(float)nativeAlpha.invoke(renderer,bakedAlpha);
             regenerate.setBoolean(renderer,false);if(legacy)refresh.invoke(renderer,new CallbackInfo("renderClouds",false));
             if(regenerate.getBoolean(renderer))rebuilds++;
             float[] pixel;
@@ -94,7 +116,6 @@ public final class LegacyWwooCloudProbe implements PreLaunchEntrypoint {
                 near(nativeColor.x,weather.x,"old RGB does not overwrite the smooth renderer");
                 near(nativeColor.y,weather.y,"weather green retained");near(nativeColor.z,weather.z,"weather blue retained");
                 near(bakedAlpha,.8f,"old biome vertex alpha cannot pop");
-                sample.invoke(renderer,new CallbackInfo("renderClouds",false));
                 RenderSystem.setShaderColor((float)nativeColor.x,(float)nativeColor.y,(float)nativeColor.z,.65f);
                 float[] state=RenderSystem.getShaderColor().clone();float[][] captured={null};
                 Operation<Void> operation=args->{captured[0]=RenderSystem.getShaderColor().clone();return null;};
@@ -112,8 +133,8 @@ public final class LegacyWwooCloudProbe implements PreLaunchEntrypoint {
         }
         if(standalone) {
             require(largestStep<.02,"no instantaneous color jump from old vanilla-renderer hooks");
-            require(rebuilds==(legacy?1:0),"no biome-triggered buffer rebuilds");
-            System.out.println((legacy?"LEGACY_WWOO_TRANSITION_PASS":"STANDALONE_TRANSITION_PASS")+": complete cloud JAR; WWOO present="+legacy+"; native camera forward/reverse crossing; RGB follows sky kernel; alpha stable; no biome buffer rebuild; largest step="+largestStep);
+            require(legacy?rebuilds>=3:rebuilds==0,"native color/alpha remain stable even when another hook forces a cloud rebuild");
+            System.out.println((legacy?"LEGACY_WWOO_TRANSITION_PASS":"STANDALONE_TRANSITION_PASS")+": complete cloud JAR; WWOO present="+legacy+"; native camera forward/reverse crossing; RGB follows sky kernel; alpha stable through native buffer rebuilds; largest step="+largestStep);
         } else {
             require(largestStep>.1,"control reproduces original instant cloud-color popping");
             require(rebuilds>=3,"control reproduces old biome alpha buffer rebuilds");
