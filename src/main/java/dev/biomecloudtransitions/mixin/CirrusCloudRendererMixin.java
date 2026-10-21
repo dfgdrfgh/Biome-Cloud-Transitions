@@ -32,7 +32,7 @@ public abstract class CirrusCloudRendererMixin {
     }
 
     @ModifyExpressionValue(method="render", at=@At(value="INVOKE",
-        target="Lcom/jvn/cirrus/client/CirrusCloudTint;color(Lnet/minecraft/class_638;FLnet/minecraft/class_243;)Lnet/minecraft/class_243;",
+        target="Lcom/jvn/cirrus/client/CirrusCloudTint;color(Lnet/minecraft/client/multiplayer/ClientLevel;FLnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;",
         remap=false), remap=false)
     private Vec3 wwoo$tintCirrusClouds(Vec3 original) {
         var color = wwoo$frameColor;
@@ -49,17 +49,11 @@ public abstract class CirrusCloudRendererMixin {
     }
 
     @ModifyExpressionValue(method="drawLayer",at=@At(value="INVOKE",
-        target="Lcom/jvn/cirrus/client/CirrusCloudRenderer;cloudShader(Z)Lnet/minecraft/class_5944;",remap=false),remap=false)
+        target="Lcom/jvn/cirrus/client/CirrusCloudRenderer;cloudShader(Z)Lnet/minecraft/client/renderer/ShaderInstance;",remap=false),remap=false)
     private ShaderInstance wwoo$cirrusOpacityMode(ShaderInstance shader) {
         var uniform=shader.getUniform(CloudOpacity.UNIFORM);
         if(uniform!=null)uniform.set(wwoo$fastOpacity?1.0f:0.0f);
         return shader;
     }
 
-    @ModifyExpressionValue(method="render",at=@At(value="INVOKE",
-        target="Lnet/minecraft/class_638;method_23785(F)Lnet/minecraft/class_243;",remap=false),remap=false)
-    private Vec3 biomeclouds$nativeWeatherColor(Vec3 original) {
-        return CloudWeather.original(original);
-    }
 }
-

@@ -1,34 +1,13 @@
-# Biome Cloud Transitions — Fabric 1.21.1
+# Biome Cloud Transitions — Forge 1.20.1 port
 
-WWOO is not required. The mod includes its own biome cloud palette and renders biome transitions independently, with vanilla, Sodium and Cirrus support.
+Cloud RGB blending with vanilla, Embeddium and Cirrus support. Java 17 and Forge 47.4.10 or newer for Minecraft 1.20.1.
 
-Java 21 and Fabric Loader 0.18.5 or newer. Cirrus 1.4.1 requires its own newer loader and dependencies.
+This branch ports the Fabric 1.21.1 implementation. Spatial Gaussian sampling, encoded biome palettes, native weather/time shading and draw-time RGB tint are preserved. It is independent of WWOO. Optional Cirrus hooks match the Forge Cirrus port; its shaders keep their native lighting and Fancy opacity, with the Fast opacity fix applied only to Cirrus cloud shader resources.
 
-Install `biome-cloud-transitions-fabric-1.21.1-1.0.1.jar` in your client `mods` folder.
+Forge 1.20.1 Embeddium uses vanilla cloud rendering; the incompatible Fabric Sodium 0.8 renderer mixin is excluded. The source Fabric branch is unchanged.
 
-Cloud RGB uses Minecraft's sky biome sampling weights at the actual camera position. Moving into a biome progressively changes the cloud color toward that biome's color. Stopping holds the current color; walking back reverses it immediately. There is no timed fade and encoded palette alpha does not fade cloud visibility.
+Build with `bash gradlew test jarJar`, then run `python3 tests/forge_release.py`. Install the JAR without the `-slim` suffix from `build/libs`. MixinExtras is bundled. GitHub Actions uploads this installable archive.
 
-Vanilla, Sodium 0.8.13 and Cirrus 1.4.1 use the same cloud palette. Optional renderer integrations are enabled only when their target classes exist. Cirrus keeps its time, weather and lighting tint. Fast layers retain their configured opacity near the sun; Fancy retains native Cirrus behavior. The opacity patch applies to Cirrus's native shader. Shader-pack replacements are outside that patch.
+Validation status is recorded in the pull request. The JUnit tests compare the sampler against Minecraft 1.20.1's actual CubicSampler across palette pairs, movement/reversal, alpha independence and boundaries, and check shader patch behavior. Compilation and these tests do not establish in-game renderer or complete-modpack compatibility. The supplied Modded Omelet ZIP is a resource pack; a complete playable Forge pack was not supplied.
 
-Version 1.0.1 fixes the core render pipeline. It captures native cloud weather/time RGB before later biome return hooks, uses that native base in vanilla/Sodium/Cirrus, and keeps vanilla cloud vertex alpha at 0.8. The spatial biome tint is then applied once at draw time. Cloud-buffer rebuilds cannot bake a second biome tint or changing biome alpha into the transition. There is no WWOO-specific runtime patch or dependency. Tests run the complete JAR alone and alongside the original `.6` rendering hooks, with a separate control that reproduces the old popping. Replace the old cloud JAR; do not keep both cloud versions installed.
-
-## Build locally
-
-Install JDK 21 and Python 3. Put Java on PATH or set `CLOUD_JAVA_HOME` to the JDK directory. From this directory:
-
-```sh
-python3 port/bootstrap.py
-python3 build.py
-python3 tests/cloud_blending.py
-```
-
-The bootstrap downloads public Minecraft/Fabric dependencies and mappings; Minecraft binaries are not redistributed in the source archive. The installable JAR is written in the project root.
-
-## Upload to GitHub
-
-Upload the contents of this directory, including `.github/workflows/build.yml`, to your repository's `main` branch. The workflow compiles the standalone cloud JAR, tests actual vanilla/Sodium/Cirrus renderer hooks and shader output on software OpenGL, then uploads the installable JAR under the run's Artifacts section. You can also start it under Actions → Build Biome Cloud Transitions → Run workflow.
-
-## Validation of the supplied JAR
-
-The supplied core JAR separates and renames the verified build .16 cloud classes into this mod's own Java/resource namespace. All executable method bytecode is retained. Its palette, mixin registrations and class references were checked after extraction. A fresh standalone Minecraft launch was not available in the packaging environment; the included workflow provides source compilation and renderer regression checks when uploaded. Upstream palette attribution is in `NOTICE.txt`.
-
+See NOTICE.txt for palette attribution and terms.

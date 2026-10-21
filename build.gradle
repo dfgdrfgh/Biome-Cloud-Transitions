@@ -1,0 +1,44 @@
+buildscript {
+    repositories { maven { url = 'https://maven.minecraftforge.net/' }; maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }; mavenCentral() }
+    dependencies { classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT' }
+}
+plugins {
+    id 'java'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+}
+apply plugin: 'org.spongepowered.mixin'
+version = '1.0.1-forge.1'
+group = 'dev.biomecloudtransitions'
+base { archivesName = 'biome-cloud-transitions-forge-1.20.1' }
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
+            mods { biome_cloud_transitions { source sourceSets.main } }
+        }
+    }
+}
+repositories { mavenCentral() }
+jarJar.enable()
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.4.10'
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    implementation(annotationProcessor('io.github.llamalad7:mixinextras-common:0.5.0'))
+    implementation(jarJar('io.github.llamalad7:mixinextras-forge:0.5.0')) { jarJar.ranged(it, '[0.5.0,0.6)') }
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.3'
+}
+mixin { add sourceSets.main, 'biome-cloud-transitions.refmap.json'; config 'biome-cloud-transitions.mixins.json' }
+test { useJUnitPlatform() }
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.release = 17 }
+jar { manifest.attributes('MixinConfigs': 'biome-cloud-transitions.mixins.json'); finalizedBy 'reobfJar' }
+tasks.named('jarJar') { archiveClassifier = ''; manifest.attributes('MixinConfigs': 'biome-cloud-transitions.mixins.json'); finalizedBy 'reobfJarJar' }
+jar { archiveClassifier = 'slim' }
+
+sourceSets.main.resources.exclude('fabric.mod.json')
+sourceSets.main.java.exclude('**/SodiumCloudRendererMixin.java')
+tasks.withType(Jar).configureEach { from('NOTICE.txt') }

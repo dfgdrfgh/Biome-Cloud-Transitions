@@ -22,16 +22,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value=LevelRenderer.class,priority=2000)
 public abstract class CloudRendererMixin {
     @Unique private CloudBlend.Color wwoo$frameColor;
-    @Inject(method="method_3259", at=@At("HEAD"), remap=false)
+    @Inject(method="renderClouds", at=@At("HEAD"))
     private void wwoo$sampleCloudColor(CallbackInfo ci) {
         // Both fancy-cloud passes use the same instant in the transition.
         CloudWeather.beginFrame();
         wwoo$frameColor = CloudAttributes.color();
     }
 
-    @WrapOperation(method="method_3259", at=@At(value="INVOKE",
-        target="Lnet/minecraft/class_291;method_34427(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/class_5944;)V",
-        remap=false), remap=false)
+    @WrapOperation(method="renderClouds", at=@At(value="INVOKE",
+        target="Lcom/mojang/blaze3d/vertex/VertexBuffer;drawWithShader(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;Lnet/minecraft/client/renderer/ShaderInstance;)V",
+        remap=false))
     private void wwoo$tintCloudDraw(VertexBuffer buffer, Matrix4f modelView, Matrix4f projection,
                                     ShaderInstance shader, Operation<Void> original) {
         // Snapshot the shared shader-color array into locals before changing it.
@@ -48,14 +48,14 @@ public abstract class CloudRendererMixin {
         }
     }
 
-    @ModifyExpressionValue(method="method_3259",at=@At(value="INVOKE",
-        target="Lnet/minecraft/class_638;method_23785(F)Lnet/minecraft/class_243;",remap=false),remap=false)
+    @ModifyExpressionValue(method="renderClouds",at=@At(value="INVOKE",
+        target="Lnet/minecraft/client/multiplayer/ClientLevel;getCloudColor(F)Lnet/minecraft/world/phys/Vec3;"))
     private Vec3 biomeclouds$nativeWeatherColor(Vec3 original) {
         return CloudWeather.original(original);
     }
 
-    @ModifyArg(method="method_3239",at=@At(value="INVOKE",
-        target="Lnet/minecraft/class_4588;method_22915(FFFF)Lnet/minecraft/class_4588;",remap=false),index=3,remap=false)
+    @ModifyArg(method="buildClouds",at=@At(value="INVOKE",
+        target="Lcom/mojang/blaze3d/vertex/VertexConsumer;color(FFFF)Lcom/mojang/blaze3d/vertex/VertexConsumer;"),index=3)
     private float biomeclouds$nativeCloudAlpha(float original) {
         // Vanilla cloud geometry uses 0.8. Biome alpha must not be baked into rebuilt cloud buffers.
         return .8f;

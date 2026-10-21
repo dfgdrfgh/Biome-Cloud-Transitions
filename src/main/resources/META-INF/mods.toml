@@ -1,0 +1,21 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="See NOTICE.txt for palette attribution and terms"
+displayTest="IGNORE_ALL_VERSION"
+[[mods]]
+modId="biome_cloud_transitions"
+version="1.0.1-forge.1"
+displayName="Biome Cloud Transitions"
+description='''Cloud RGB blending with vanilla, Embeddium and Cirrus support.'''
+[[dependencies.biome_cloud_transitions]]
+modId="forge"
+mandatory=true
+versionRange="[47.4.10,)"
+ordering="NONE"
+side="CLIENT"
+[[dependencies.biome_cloud_transitions]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1,1.20.2)"
+ordering="NONE"
+side="CLIENT"
