@@ -43,11 +43,3 @@ jobs:
           path: biome-cloud-transitions-fabric-1.21.1-1.0.1.jar
           if-no-files-found: error
           retention-days: 30
-      - name: Upload renderer logs if validation fails
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Cloud-renderer-test-logs
-          path: test-cloud-rendering/*.log
-          if-no-files-found: ignore
-
