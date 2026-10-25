@@ -79,6 +79,7 @@ jobs:
         with:
           mc: '1.21.1'
           modloader: fabric
+          regex: .*fabric.*
           mc-runtime-test: fabric
           java: '21'
           fabric-api: none
