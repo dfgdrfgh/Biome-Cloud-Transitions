@@ -66,7 +66,7 @@ public final class CirrusCloudRenderProbe implements PreLaunchEntrypoint {
     @Override public void onPreLaunch() {
         try {
             check();
-            System.out.println("CIRRUS_CLOUD_RENDER_PASS: exact pack renderer versions/settings, injected tint after Cirrus color, all draw passes share tint, real cloud shader pixels, three constant layer opacities and four time tints");
+            System.out.println("CIRRUS_CLOUD_RENDER_PASS: exact pack renderer versions/settings, injected tint after Cirrus color, all draw passes share tint, real cloud shader pixels, three native layer opacities, blended biome density and four time tints");
             System.exit(0);
         } catch(Throwable failure) {
             failure.printStackTrace();System.exit(1);
@@ -191,6 +191,7 @@ public final class CirrusCloudRenderProbe implements PreLaunchEntrypoint {
                         int previousRed=-1;
                         for(int step=0;step<=120;step++) {
                             var tint=CloudBlend.sample(-14+28*step/120.0,64,0,(x,y,z) -> x<0 ? pair[0]:pair[1]);frame.set(renderer,tint);
+                            shader.getUniform(CloudOpacity.BIOME_UNIFORM).set((float)tint.opacityScale());
                             Vec3 color=(Vec3)hook.invoke(renderer,cirrus);
                             require(color.distanceTo(new Vec3(cirrus.x*tint.red(),cirrus.y*tint.green(),cirrus.z*tint.blue()))<1e-9,"preserve Cirrus base RGB");
                             for(double alpha:opacity) {
@@ -198,8 +199,8 @@ public final class CirrusCloudRenderProbe implements PreLaunchEntrypoint {
                                 shader.setDefaultUniforms(VertexFormat.Mode.TRIANGLES,new Matrix4f(),new Matrix4f(),null);shader.apply();
                                 GL11.glClearColor(0,0,0,0);GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);GL11.glDrawArrays(GL11.GL_TRIANGLES,0,3);
                                 GL11.glReadPixels(16,16,1,1,GL11.GL_RGBA,GL11.GL_UNSIGNED_BYTE,pixel);
-                                double[] expected={color.x,color.y,color.z,alpha};
-                                for(int channel=0;channel<4;channel++)require(Math.abs((pixel.get(channel)&255)-255*expected[channel])<=2,"Cirrus rendered pixel matches tinted RGB and constant opacity "+channel);
+                                double[] expected={color.x,color.y,color.z,alpha*tint.opacityScale()};
+                                for(int channel=0;channel<4;channel++)require(Math.abs((pixel.get(channel)&255)-255*expected[channel])<=2,"Cirrus rendered pixel matches tinted RGB and blended biome opacity "+channel);
                             }
                             if(pair[0]==0xccffffff && previousRed>=0)require((pixel.get(0)&255)<=previousRed,"white-to-gray pixels dim continuously");
                             previousRed=pixel.get(0)&255;
@@ -252,10 +253,11 @@ public final class CirrusCloudRenderProbe implements PreLaunchEntrypoint {
                 for(int step=0;step<=120;step++) {
                     var tint=CloudBlend.sample(-14+28*step/120.0,64,0,(x,y,z)->x<0 ? 0xccffffff:0x66828282);
                     frame.set(renderer,tint);Vec3 color=(Vec3)hook.invoke(renderer,new Vec3(.7,.8,.9));
+                    shader.getUniform(CloudOpacity.BIOME_UNIFORM).set((float)tint.opacityScale());
                     drawPixel(shader,pixel,color,alpha);int actual=pixel.get(3)&255;
-                    require(Math.abs(actual-expected*255)<=2,"native Cirrus alpha equation in context "+context+" layer "+layerName);
-                    if(firstAlpha<0)firstAlpha=actual;
-                    require(actual==firstAlpha,"biome RGB cannot change fragment alpha under any tested lighting/weather context");
+                    require(Math.abs(actual-expected*tint.opacityScale()*255)<=2,"Cirrus weather and biome opacity combine in context "+context+" layer "+layerName);
+                    if(firstAlpha>=0)require(actual<=firstAlpha+1,"biome opacity smoothly decreases toward Pale Garden");
+                    firstAlpha=actual;
                 }
             }
         }
@@ -281,9 +283,11 @@ public final class CirrusCloudRenderProbe implements PreLaunchEntrypoint {
                 var tint=CloudBlend.sample(position,64,0,(x,y,z)->x<0 ? sourceCloud:targetCloud);
                 var sky=CloudBlend.sample(position,64,0,(x,y,z)->x<0 ? sourceSky:targetSky);
                 frame.set(renderer,tint);Vec3 color=(Vec3)hook.invoke(renderer,new Vec3(1,1,1));
+                shader.getUniform(CloudOpacity.BIOME_UNIFORM).set((float)tint.opacityScale());
+                double blendedOpacity=alpha*tint.opacityScale();
                 GL11.glDisable(GL11.GL_BLEND);GL11.glClearColor(0,0,0,0);
                 drawPixel(shader,pixel,color,(float)alpha);
-                require(Math.abs((pixel.get(3)&255)-alpha*255)<=2,"raw cloud alpha unchanged before sky composition");
+                require(Math.abs((pixel.get(3)&255)-blendedOpacity*255)<=2,"raw cloud alpha follows smooth biome opacity before sky composition");
                 GL11.glEnable(GL11.GL_BLEND);
                 GL14.glBlendFuncSeparate(GL11.GL_SRC_ALPHA,GL11.GL_ONE_MINUS_SRC_ALPHA,GL11.GL_ONE,GL11.GL_ONE_MINUS_SRC_ALPHA);
                 GL11.glClearColor((float)sky.red(),(float)sky.green(),(float)sky.blue(),1);
@@ -291,7 +295,7 @@ public final class CirrusCloudRenderProbe implements PreLaunchEntrypoint {
                 double[] background={sky.red(),sky.green(),sky.blue()},foreground={color.x,color.y,color.z};
                 double contrast=0;
                 for(int channel=0;channel<3;channel++) {
-                    double expected=foreground[channel]*alpha+background[channel]*(1-alpha);
+                    double expected=foreground[channel]*blendedOpacity+background[channel]*(1-blendedOpacity);
                     require(Math.abs((pixel.get(channel)&255)-expected*255)<=2,"actual shader/sky alpha composition matches RGB equation");
                     double difference=(pixel.get(channel)&255)/255.0-background[channel];contrast+=difference*difference;
                 }
@@ -299,15 +303,16 @@ public final class CirrusCloudRenderProbe implements PreLaunchEntrypoint {
                 contrast=Math.sqrt(contrast);lowest=Math.min(lowest,contrast);
                 if(step==0)first=contrast;if(step==120)last=contrast;
             }
-            require(lowest<Math.min(first,last)*.5,"cloud/sky contrast dips then returns with absolutely constant cloud alpha");
+            require(lowest<Math.min(first,last)*.5,"cloud/sky contrast dips then returns with smoothly blended biome alpha");
             evidence.append(" layer=").append(alpha).append(" contrast=").append(first).append(" -> ").append(lowest).append(" -> ").append(last);
         }
         GL11.glDisable(GL11.GL_BLEND);
-        System.out.println("CIRRUS_OPACITY_COMPOSITE_PASS: 6 native lighting/weather/time contexts keep biome alpha constant; pack time fades disabled; actual biome palettes reproduce contrast disappearance with alpha .25/.5/.15;"+evidence);
+        System.out.println("CIRRUS_OPACITY_COMPOSITE_PASS: 6 native lighting/weather/time contexts preserve native alpha while blending biome density; pack time fades disabled; actual biome palettes reproduce contrast with layer alpha .25/.5/.15;"+evidence);
     }
 
     private static void checkFastSunOpacity(ShaderInstance shader,Class<?> type,Object renderer,Field frame,Method tintHook,ByteBuffer pixel) throws Exception {
-        require(shader.getUniform(CloudOpacity.UNIFORM)!=null,"actual Fabric shader constructor loads patched JSON and fragment uniform");
+        require(shader.getUniform(CloudOpacity.UNIFORM)!=null,"actual Fabric shader constructor loads fast-opacity uniform");
+        require(shader.getUniform(CloudOpacity.BIOME_UNIFORM)!=null,"actual Cirrus shader loads biome-opacity uniform");
         Method layerHook=Arrays.stream(type.getDeclaredMethods()).filter(m->m.getName().contains("wwoo$cirrusLayerMode")).findFirst().orElseThrow();layerHook.setAccessible(true);
         Method modeHook=Arrays.stream(type.getDeclaredMethods()).filter(m->m.getName().contains("wwoo$cirrusOpacityMode")).findFirst().orElseThrow();modeHook.setAccessible(true);
         var exported=new ClassNode();new ClassReader(Files.readAllBytes(Path.of(".mixin.out/class").resolve(type.getName().replace('.','/')+".class"))).accept(exported,0);
@@ -340,12 +345,13 @@ public final class CirrusCloudRenderProbe implements PreLaunchEntrypoint {
                     frame.set(renderer,tint);Vec3 color=(Vec3)tintHook.invoke(renderer,new Vec3(.7,.8,.9));
                     setter.invoke(setting,fancy);layerHook.invoke(renderer,args);modeHook.invoke(renderer,shader);
                     require(shader.getUniform(CloudOpacity.UNIFORM).getFloatBuffer().get(0)==0f,"Fancy keeps native sunlight alpha");
+                    require(Math.abs(shader.getUniform(CloudOpacity.BIOME_UNIFORM).getFloatBuffer().get(0)-tint.opacityScale())<1e-6,"Fancy uniform follows biome alpha");
                     drawPixel(shader,pixel,color,alpha);int[] rgb={pixel.get(0)&255,pixel.get(1)&255,pixel.get(2)&255};
-                    require(Math.abs((pixel.get(3)&255)-(alpha+(1-alpha)*sunWeight)*time*255)<=2,"Fancy sunlight opacity unchanged");
+                    require(Math.abs((pixel.get(3)&255)-(alpha+(1-alpha)*sunWeight)*time*tint.opacityScale()*255)<=2,"Fancy sunlight opacity preserves weather/time and blends biome density");
                     setter.invoke(setting,fast);layerHook.invoke(renderer,args);modeHook.invoke(renderer,shader);
                     require(shader.getUniform(CloudOpacity.UNIFORM).getFloatBuffer().get(0)==1f,"Fast layer selects configured-opacity mode");
                     drawPixel(shader,pixel,color,alpha);
-                    require(Math.abs((pixel.get(3)&255)-alpha*time*255)<=2,"Fast opacity preserved near sun across biome blend, rain and time fade");
+                    require(Math.abs((pixel.get(3)&255)-alpha*time*tint.opacityScale()*255)<=2,"Fast opacity preserves weather/time and blends biome density");
                     for(int c=0;c<3;c++)require((pixel.get(c)&255)==rgb[c],"Fast and Fancy retain identical RGB sunlight/twilight lighting");
                 }
             }
@@ -358,6 +364,7 @@ public final class CirrusCloudRenderProbe implements PreLaunchEntrypoint {
             shader.getUniform("CirrusLightViewDirection").set(0f,0f,1f);shader.getUniform("CirrusSunWeight").set(1f);
             shader.getUniform("CirrusRainLevel").set(0f);shader.getUniform("CirrusThunderLevel").set(0f);
             shader.getUniform("CirrusLightningFlash").set(0f);shader.getUniform("CirrusTimeOpacity").set(1f);
+            shader.getUniform(CloudOpacity.BIOME_UNIFORM).set(1f);
         }
     }
 
