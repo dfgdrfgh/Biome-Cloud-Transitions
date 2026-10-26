@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 /** Limit Cirrus's sun opacity override to its original Fancy path, retaining all RGB lighting. */
 public final class CloudOpacity {
     public static final String UNIFORM="WwooFastOpacity";
+    public static final String BIOME_UNIFORM="WwooBiomeOpacity";
     private static final String SUN_ALPHA="color.a = mix(color.a, 1.0, sunIllumination * CirrusSunWeight);";
     private static final ClassValue<Method> STYLE=new ClassValue<>() {
         @Override protected Method computeValue(Class<?> type) {
@@ -41,16 +42,31 @@ public final class CloudOpacity {
         if(path.endsWith(".json")) {
             var json=JsonParser.parseString(source).getAsJsonObject();var uniforms=json.getAsJsonArray("uniforms");
             if(uniforms==null)return source;
-            for(var entry:uniforms)if(UNIFORM.equals(entry.getAsJsonObject().get("name").getAsString()))return source;
-            var uniform=new JsonObject();uniform.addProperty("name",UNIFORM);uniform.addProperty("type","float");uniform.addProperty("count",1);
-            var values=new com.google.gson.JsonArray();values.add(0.0f);uniform.add("values",values);uniforms.add(uniform);
+            boolean hasFast=false,hasBiome=false;
+            for(var entry:uniforms) {
+                var name=entry.getAsJsonObject().get("name").getAsString();
+                hasFast |= UNIFORM.equals(name);
+                hasBiome |= BIOME_UNIFORM.equals(name);
+            }
+            if(!hasFast) {
+                var uniform=new JsonObject();uniform.addProperty("name",UNIFORM);uniform.addProperty("type","float");uniform.addProperty("count",1);
+                var values=new com.google.gson.JsonArray();values.add(0.0f);uniform.add("values",values);uniforms.add(uniform);
+            }
+            if(!hasBiome) {
+                var uniform=new JsonObject();uniform.addProperty("name",BIOME_UNIFORM);uniform.addProperty("type","float");uniform.addProperty("count",1);
+                var values=new com.google.gson.JsonArray();values.add(1.0f);uniform.add("values",values);uniforms.add(uniform);
+            }
             return json.toString();
         }
-        if(source.contains("uniform float "+UNIFORM+";"))return source;
-        if(!source.contains("uniform float CirrusSunWeight;")||!source.contains(SUN_ALPHA)) {
+        if(source.contains("uniform float "+UNIFORM+";")
+            && source.contains("uniform float "+BIOME_UNIFORM+";"))return source;
+        if(!source.contains("uniform float CirrusSunWeight;")||!source.contains(SUN_ALPHA)
+            ||!source.contains("fragColor.a *= CirrusTimeOpacity;")) {
             LoggerFactory.getLogger("BiomeCloudTransitions").warn("Cirrus cloud shader differs from the supported source; retaining its original opacity behavior");return source;
         }
-        return source.replace("uniform float CirrusSunWeight;","uniform float CirrusSunWeight;\nuniform float "+UNIFORM+";")
-            .replace(SUN_ALPHA,"color.a = mix(color.a, 1.0, sunIllumination * CirrusSunWeight * (1.0 - "+UNIFORM+"));");
+        return source.replace("uniform float CirrusSunWeight;","uniform float CirrusSunWeight;\nuniform float "+UNIFORM+";\nuniform float "+BIOME_UNIFORM+";")
+            .replace(SUN_ALPHA,"color.a = mix(color.a, 1.0, sunIllumination * CirrusSunWeight * (1.0 - "+UNIFORM+"));")
+            .replace("fragColor.a *= CirrusTimeOpacity;",
+                "fragColor.a *= CirrusTimeOpacity * "+BIOME_UNIFORM+";");
     }
 }

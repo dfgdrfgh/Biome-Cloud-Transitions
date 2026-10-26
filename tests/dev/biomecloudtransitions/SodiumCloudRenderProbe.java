@@ -51,7 +51,7 @@ public final class SodiumCloudRenderProbe implements PreLaunchEntrypoint {
     @Override public void onPreLaunch() {
         try {
             check();
-            System.out.println("SODIUM_CLOUD_RENDER_PASS: exact Sodium/Sodium Extra modpack versions, injected RGB hook, actual cloud shader pixels, constant opacity and original reset");
+            System.out.println("SODIUM_CLOUD_RENDER_PASS: exact Sodium/Sodium Extra modpack versions, injected RGB/opacity hook, actual cloud shader pixels, biome fades and original reset");
             System.exit(0);
         } catch (Throwable failure) {
             failure.printStackTrace();System.exit(1);
@@ -112,13 +112,13 @@ public final class SodiumCloudRenderProbe implements PreLaunchEntrypoint {
                 for(int step=0;step<=120;step++) {
                     var tint=CloudBlend.sample(-14+28*step/120.0,64,0,(x,y,z) -> x<0 ? pair[0]:pair[1]);frame.set(renderer,tint);
                     var args=new ColorArgs();hook.invoke(renderer,args);
-                    require((float)args.get(3)==.8f,"Sodium opacity unchanged");
+                    require(Math.abs((float)args.get(3)-.8f*(float)tint.opacityScale())<1e-6f,"Sodium opacity follows spatial blend");
                     RenderSystem.setShaderColor(args.get(0),args.get(1),args.get(2),args.get(3));
                     shader.setDefaultUniforms(VertexFormat.Mode.TRIANGLES,new Matrix4f(),new Matrix4f(),null);shader.apply();
                     GL11.glClearColor(0,0,0,0);GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
                     GL11.glDrawArrays(GL11.GL_TRIANGLES,0,3);
                     GL11.glReadPixels(16,16,1,1,GL11.GL_RGBA,GL11.GL_UNSIGNED_BYTE,pixel);
-                    double[] expected={.7*.7*tint.red(),.7*.8*tint.green(),.7*.9*tint.blue(),.8};
+                    double[] expected={.7*.7*tint.red(),.7*.8*tint.green(),.7*.9*tint.blue(),.8*tint.opacityScale()};
                     for(int channel=0;channel<4;channel++)
                         require(Math.abs((pixel.get(channel)&255)-255*expected[channel])<=2,"Sodium shader pixel matches biome color channel "+channel);
                     if(pair[0]==0xccffffff && previousRed>=0)require((pixel.get(0)&255)<=previousRed,"white-to-gray pixels dim continuously");

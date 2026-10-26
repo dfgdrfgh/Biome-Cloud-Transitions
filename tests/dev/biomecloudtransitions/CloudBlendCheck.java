@@ -18,7 +18,7 @@ public final class CloudBlendCheck {
         require(Math.abs(actual-expected)<1e-12,message+": "+actual+" != "+expected);
     }
     private static void same(CloudBlend.Color a,CloudBlend.Color b,String message) {
-        near(a.red(),b.red(),message+" red");near(a.green(),b.green(),message+" green");near(a.blue(),b.blue(),message+" blue");
+        near(a.red(),b.red(),message+" red");near(a.green(),b.green(),message+" green");near(a.blue(),b.blue(),message+" blue");near(a.alpha(),b.alpha(),message+" alpha");
     }
     private static double skyWeight(double x,double y,double z,CloudBlend.BiomeColors mask) {
         // This is the unshaded biome contribution in Minecraft 1.21.1's getSkyColor.
@@ -30,6 +30,7 @@ public final class CloudBlendCheck {
         near(actual.red(),source.red()*(1-weight)+target.red()*weight,message+" red");
         near(actual.green(),source.green()*(1-weight)+target.green()*weight,message+" green");
         near(actual.blue(),source.blue()*(1-weight)+target.blue()*weight,message+" blue");
+        near(actual.alpha(),source.alpha()*(1-weight)+target.alpha()*weight,message+" alpha");
     }
     public static void check() throws Exception {
         var palettes=new ArrayList<Integer>();palettes.add(WHITE);
@@ -74,14 +75,17 @@ public final class CloudBlendCheck {
             }
             var first=CloudBlend.sample(x,y,z,(qx,qy,qz)->qx<0 ? 0x11ffffff:PALE);
             var alpha=CloudBlend.sample(x,y,z,(qx,qy,qz)->qx<0 ? WHITE:0xff828282);
-            same(first,alpha,"encoded biome alpha never biases RGB weights");
+            near(first.red(),alpha.red(),"alpha-independent red");
+            near(first.green(),alpha.green(),"alpha-independent green");
+            near(first.blue(),alpha.blue(),"alpha-independent blue");
+            require(Math.abs(first.alpha()-alpha.alpha())>1e-3,"encoded biome opacity changes independently of RGB");
             same(CloudBlend.sample(x,y,z,(qx,qy,qz)->PALE),CloudBlend.Color.fromArgb(PALE),"constant biome exact everywhere");
         }
         // The sky fetches 6^3 quart-biome samples. Sky-sized locality must remain bounded.
         int[] calls={0};CloudBlend.sample(.123,64.456,-.789,(x,y,z)->{calls[0]++;return WHITE;});
-        require(calls[0]==216,"use the native sky's bounded 6x6x6 sampler");
+        require(calls[0]==432,"RGB and alpha each use the sky's bounded 6x6x6 sampler");
         // Different client worlds / palettes cannot retain an old color because there is no stored fade.
         same(CloudBlend.sample(0,64,0,(x,y,z)->PALE),CloudBlend.Color.fromArgb(PALE),"new world palette immediate");
-        System.out.println("CLOUD_SKY_BLEND_PASS: "+palettes.size()*palettes.size()+" biome palette pairs match native sky weights, movement/stop/reversal, negative/vertical/diagonal boundaries, exact interiors and alpha independence");
+        System.out.println("CLOUD_SKY_BLEND_PASS: "+palettes.size()*palettes.size()+" biome palette pairs match native sky weights, movement/stop/reversal, negative/vertical/diagonal boundaries, exact interiors, RGB independence and smooth alpha");
     }
 }

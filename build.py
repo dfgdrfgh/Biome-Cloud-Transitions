@@ -27,7 +27,7 @@ with zipfile.ZipFile(intermediary) as z:
 for p in (ROOT/'src/main/resources').rglob('*'):
     if p.is_file(): entries[p.relative_to(ROOT/'src/main/resources').as_posix()] = p.read_bytes()
 entries['NOTICE.txt'] = (ROOT/'NOTICE.txt').read_bytes()
-out = ROOT/'biome-cloud-transitions-fabric-1.21.1-1.0.1.jar'
+out = ROOT/'biome-cloud-transitions-fabric-1.21.1-1.0.2.jar'
 with zipfile.ZipFile(out,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
     for n,data in sorted(entries.items()):
         info=zipfile.ZipInfo(n,(1980,1,1,0,0,0));info.create_system=3;info.external_attr=0o100644<<16;info.compress_type=zipfile.ZIP_DEFLATED

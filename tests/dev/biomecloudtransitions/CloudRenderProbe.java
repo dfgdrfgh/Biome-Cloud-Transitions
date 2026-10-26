@@ -19,7 +19,7 @@ public final class CloudRenderProbe implements PreLaunchEntrypoint {
     @Override public void onPreLaunch() {
         try {
             check();
-            System.out.println("CLOUD_RENDER_PASS: real client hook, direct biome RGB transitions, constant opacity, coherent passes, draw arguments and shader-state restoration");
+            System.out.println("CLOUD_RENDER_PASS: real client hook, direct biome RGB and opacity transitions, coherent passes, draw arguments and shader-state restoration");
             System.exit(0);
         } catch (Throwable failure) {
             failure.printStackTrace();
@@ -71,7 +71,7 @@ public final class CloudRenderProbe implements PreLaunchEntrypoint {
                 near(passes[0][0], originalState[0] * color.red(), "red uniform");
                 near(passes[0][1], originalState[1] * color.green(), "green uniform");
                 near(passes[0][2], originalState[2] * color.blue(), "blue uniform");
-                require(passes[0][3] == originalState[3], "cloud opacity stays constant throughout transition");
+                near(passes[0][3], originalState[3] * color.opacityScale(), "biome opacity uses original shader-alpha baseline");
                 double[] rgb = {passes[0][0]/originalState[0],passes[0][1]/originalState[1],passes[0][2]/originalState[2]};
                 double[] from = {source.red(),source.green(),source.blue()}, to = {target.red(),target.green(),target.blue()};
                 for(int channel=0;channel<3;channel++)
@@ -79,6 +79,7 @@ public final class CloudRenderProbe implements PreLaunchEntrypoint {
                         && rgb[channel] <= Math.max(from[channel],to[channel])+2e-7, "RGB stays between the two biome colors");
                 if(frame==120) for(int channel=0;channel<3;channel++)
                     near(rgb[channel],to[channel],"rendered destination biome color exact");
+                if(frame==120)near(passes[0][3],originalState[3]*target.opacityScale(),"rendered destination opacity exact");
             }
         }
         RuntimeException sentinel = new RuntimeException("test draw failure");

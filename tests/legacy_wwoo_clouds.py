@@ -3,7 +3,7 @@ from pathlib import Path
 import os,shutil,subprocess,json,zipfile
 ROOT=Path(__file__).resolve().parent.parent
 JAVA=Path(os.environ['CLOUD_JAVA_HOME'])/'bin' if 'CLOUD_JAVA_HOME' in os.environ else Path(shutil.which('javac')).resolve().parent
-JAR=ROOT/'biome-cloud-transitions-fabric-1.21.1-1.0.1.jar'
+JAR=ROOT/'biome-cloud-transitions-fabric-1.21.1-1.0.2.jar'
 folder=ROOT/'test-legacy-wwoo';shutil.rmtree(folder,ignore_errors=True);(folder/'mods').mkdir(parents=True)
 # The renderer suite has downloaded the exact platform client libraries from Mojang.
 client_libraries=[str(p.resolve()) for p in (ROOT/'test-runtime/libraries').rglob('*.jar')]

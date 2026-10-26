@@ -53,6 +53,8 @@ public abstract class CirrusCloudRendererMixin {
     private ShaderInstance wwoo$cirrusOpacityMode(ShaderInstance shader) {
         var uniform=shader.getUniform(CloudOpacity.UNIFORM);
         if(uniform!=null)uniform.set(wwoo$fastOpacity?1.0f:0.0f);
+        var biomeOpacity = shader.getUniform(CloudOpacity.BIOME_UNIFORM);
+        if(biomeOpacity!=null)biomeOpacity.set((float)wwoo$frameColor.opacityScale());
         return shader;
     }
 

@@ -4,13 +4,13 @@ WWOO is not required. The mod includes its own biome cloud palette and renders b
 
 Java 21 and Fabric Loader 0.18.5 or newer. Cirrus 1.4.1 requires its own newer loader and dependencies.
 
-Install `biome-cloud-transitions-fabric-1.21.1-1.0.1.jar` in your client `mods` folder.
+Install `biome-cloud-transitions-fabric-1.21.1-1.0.2.jar` in your client `mods` folder.
 
-Cloud RGB uses Minecraft's sky biome sampling weights at the actual camera position. Moving into a biome progressively changes the cloud color toward that biome's color. Stopping holds the current color; walking back reverses it immediately. There is no timed fade and encoded palette alpha does not fade cloud visibility.
+Cloud RGB and opacity use Minecraft's sky biome sampling weights at the actual camera position. Moving into a biome progressively blends cloud color and transparency toward that biome's configured palette. Stopping holds the current color/opacity; walking back reverses immediately. There is no timed fade. Biomes without custom palette attributes use vanilla-style white clouds at 0.8 opacity.
 
-Vanilla, Sodium 0.8.13 and Cirrus 1.4.1 use the same cloud palette. Optional renderer integrations are enabled only when their target classes exist. Cirrus keeps its time, weather and lighting tint. Fast layers retain their configured opacity near the sun; Fancy retains native Cirrus behavior. The opacity patch applies to Cirrus's native shader. Shader-pack replacements are outside that patch.
+Vanilla, Sodium 0.8.13 and Cirrus 1.4.1 use the same cloud palette. Optional renderer integrations are enabled only when their target classes exist. Cirrus keeps its time, weather and lighting tint. Fast layers retain their configured opacity near the sun and Fancy retains native Cirrus behavior; both are scaled by the smoothly blended biome opacity. The opacity patch applies to Cirrus's native shader. Shader-pack replacements are outside that patch.
 
-Version 1.0.1 fixes the core render pipeline. It captures native cloud weather/time RGB before later biome return hooks, uses that native base in vanilla/Sodium/Cirrus, and keeps vanilla cloud vertex alpha at 0.8. The spatial biome tint is then applied once at draw time. Cloud-buffer rebuilds cannot bake a second biome tint or changing biome alpha into the transition. There is no WWOO-specific runtime patch or dependency. Tests run the complete JAR alone and alongside the original `.6` rendering hooks, with a separate control that reproduces the old popping. Replace the old cloud JAR; do not keep both cloud versions installed.
+Version 1.0.2 builds on the core render-pipeline fixes and also enables spatially blended biome cloud opacity. It preserves the native colors and the vanilla 0.8 vertex alpha, and applies the opacity multiplier at draw/shader time for vanilla, Sodium and Cirrus. Version 1.0.1 fixed the core render pipeline. It captures native cloud weather/time RGB before later biome return hooks, uses that native base in vanilla/Sodium/Cirrus, and keeps vanilla cloud vertex alpha at 0.8. The spatial biome tint is then applied once at draw time. Cloud-buffer rebuilds cannot bake a second biome tint or a changing biome alpha into the transition. There is no WWOO-specific runtime patch or dependency. Tests run the complete JAR alone and alongside the original `.6` rendering hooks, with a separate control that reproduces the old popping. Replace the old cloud JAR; do not keep both cloud versions installed.
 
 ## Build locally
 

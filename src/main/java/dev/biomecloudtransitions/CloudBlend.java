@@ -7,10 +7,13 @@ import net.minecraft.world.phys.Vec3;
 public final class CloudBlend {
     private CloudBlend() {}
 
-    public record Color(double red, double green, double blue) {
+    public record Color(double red, double green, double blue, double alpha) {
+        // 0xcc is the vanilla cloud opacity; other biome palette alpha values
+        // scale it at draw time, without rebuilding buffered cloud geometry.
+        public double opacityScale() { return alpha / (204.0 / 255.0); }
         public static Color fromArgb(int argb) {
             return new Color(((argb >> 16) & 255) / 255.0, ((argb >> 8) & 255) / 255.0,
-                (argb & 255) / 255.0);
+                (argb & 255) / 255.0, ((argb >>> 24) & 255) / 255.0);
         }
     }
 
@@ -26,6 +29,12 @@ public final class CloudBlend {
             var rgb = Color.fromArgb(colors.atQuart(x, y, z));
             return new Vec3(rgb.red(), rgb.green(), rgb.blue());
         });
-        return new Color(mixed.x, mixed.y, mixed.z);
+        // Sample opacity using exactly the same cubic sky weights as RGB.
+        // This is spatial, not a timed fade, and therefore cannot pop at a border.
+        double alpha = CubicSampler.gaussianSampleVec3(position, (x, y, z) -> {
+            var value = Color.fromArgb(colors.atQuart(x, y, z)).alpha();
+            return new Vec3(value, value, value);
+        }).x;
+        return new Color(mixed.x, mixed.y, mixed.z, alpha);
     }
 }

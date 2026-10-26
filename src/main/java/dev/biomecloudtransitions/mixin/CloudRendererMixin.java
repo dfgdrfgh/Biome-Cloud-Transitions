@@ -40,7 +40,7 @@ public abstract class CloudRendererMixin {
         float red = state[0], green = state[1], blue = state[2], alpha = state[3];
         var color = wwoo$frameColor;
         RenderSystem.setShaderColor(red * (float)color.red(), green * (float)color.green(),
-            blue * (float)color.blue(), alpha);
+            blue * (float)color.blue(), alpha * (float)color.opacityScale());
         try {
             original.call(buffer, modelView, projection, shader);
         } finally {
@@ -57,7 +57,7 @@ public abstract class CloudRendererMixin {
     @ModifyArg(method="method_3239",at=@At(value="INVOKE",
         target="Lnet/minecraft/class_4588;method_22915(FFFF)Lnet/minecraft/class_4588;",remap=false),index=3,remap=false)
     private float biomeclouds$nativeCloudAlpha(float original) {
-        // Vanilla cloud geometry uses 0.8. Biome alpha must not be baked into rebuilt cloud buffers.
+        // Keep vanilla geometry at 0.8. Smooth biome opacity is applied at draw time.
         return .8f;
     }
 }
