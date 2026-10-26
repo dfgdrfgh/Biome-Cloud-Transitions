@@ -34,7 +34,9 @@ public abstract class SodiumCloudRendererMixin {
         args.set(0, (float)args.get(0) * (float)color.red());
         args.set(1, (float)args.get(1) * (float)color.green());
         args.set(2, (float)args.get(2) * (float)color.blue());
-        // Keep Sodium's opacity and its later white shader-state reset unchanged.
+        // Blend the configured biome cloud opacity while preserving Sodium's
+        // original color reset and underlying weather/lighting modifiers.
+        args.set(3, (float)args.get(3) * (float)color.opacityScale());
     }
 
     @ModifyExpressionValue(method="render",at=@At(value="INVOKE",
