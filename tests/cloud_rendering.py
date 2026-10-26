@@ -4,7 +4,7 @@ import concurrent.futures,hashlib,json,os,platform,shutil,subprocess,urllib.requ
 
 ROOT=Path(__file__).resolve().parent.parent
 JAVA=Path(os.environ['CLOUD_JAVA_HOME'])/'bin' if 'CLOUD_JAVA_HOME' in os.environ else Path(shutil.which('javac')).resolve().parent
-JAR=ROOT/'biome-cloud-transitions-fabric-1.21.1-1.0.1.jar'
+JAR=ROOT/'biome-cloud-transitions-fabric-1.21.1-1.0.2.jar'
 folder=ROOT/'test-cloud-rendering';shutil.rmtree(folder,ignore_errors=True)
 (folder/'mods').mkdir(parents=True)
 with zipfile.ZipFile(JAR) as z:
