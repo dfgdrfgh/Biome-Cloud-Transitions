@@ -137,15 +137,17 @@ public final class LegacyWwooCloudProbe implements PreLaunchEntrypoint {
                 near(pixel[0],weather.x*expected.x,"native camera produces smooth cloud red");
                 near(pixel[1],weather.y*expected.y,"native camera produces smooth cloud green");
                 near(pixel[2],weather.z*expected.z,"native camera produces smooth cloud blue");
-                near(pixel[3],.65f,"combined shader alpha remains constant across old biome alpha changes");
+                var biome=CloudBlend.sample(x,64,0,(qx,qy,qz)->qx<0?0x11ffffff:0x66828282);
+                near(pixel[3],.65f*biome.opacityScale(),"combined shader alpha smoothly follows biome palette, not old vertex rebuilds");
             } else pixel=new float[]{(float)nativeColor.x,(float)nativeColor.y,(float)nativeColor.z,bakedAlpha};
-            if(previous!=null)for(int channel=0;channel<3;channel++)largestStep=Math.max(largestStep,Math.abs(pixel[channel]-previous[channel]));
+            if(previous!=null)for(int channel=0;channel<(standalone?4:3);channel++)
+                largestStep=Math.max(largestStep,Math.abs(pixel[channel]-previous[channel]));
             previous=pixel;
         }
         if(standalone) {
-            require(largestStep<.02,"no instantaneous color jump from old vanilla-renderer hooks");
+            require(largestStep<.02,"no instantaneous color or opacity jump from old vanilla-renderer hooks");
             require(legacy?rebuilds>=3:rebuilds==0,"native color/alpha remain stable even when another hook forces a cloud rebuild");
-            System.out.println((legacy?"LEGACY_WWOO_TRANSITION_PASS":"STANDALONE_TRANSITION_PASS")+": complete cloud JAR; WWOO present="+legacy+"; native camera forward/reverse crossing; RGB follows sky kernel; alpha stable through native buffer rebuilds; largest step="+largestStep);
+            System.out.println((legacy?"LEGACY_WWOO_TRANSITION_PASS":"STANDALONE_TRANSITION_PASS")+": complete cloud JAR; WWOO present="+legacy+"; native camera forward/reverse crossing; RGB and alpha follow sky kernel; base vertex alpha stays stable through native buffer rebuilds; largest step="+largestStep);
         } else {
             require(largestStep>.1,"control reproduces original instant cloud-color popping");
             require(rebuilds>=3,"control reproduces old biome alpha buffer rebuilds");
