@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "id": "biome_cloud_transitions",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "name": "Biome Cloud Transitions",
-  "description": "Cloud RGB blending with Sodium and Cirrus support.",
+  "description": "Cloud RGB and opacity blending with Sodium and Cirrus support.",
   "environment": "client",
   "depends": {
     "fabricloader": ">=0.18.5",
