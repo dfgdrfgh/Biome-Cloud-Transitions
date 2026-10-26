@@ -2,7 +2,7 @@ name: Build Biome Cloud Transitions
 
 on:
   push:
-    branches: [main, 'fix/blend-all-biome-cloud-opacity-20261026']
+    branches: [main]
   workflow_dispatch:
 
 permissions:
