@@ -83,7 +83,7 @@ public final class CloudBlendCheck {
         }
         // The sky fetches 6^3 quart-biome samples. Sky-sized locality must remain bounded.
         int[] calls={0};CloudBlend.sample(.123,64.456,-.789,(x,y,z)->{calls[0]++;return WHITE;});
-        require(calls[0]==216,"use the native sky's bounded 6x6x6 sampler");
+        require(calls[0]==432,"RGB and alpha each use the sky's bounded 6x6x6 sampler");
         // Different client worlds / palettes cannot retain an old color because there is no stored fade.
         same(CloudBlend.sample(0,64,0,(x,y,z)->PALE),CloudBlend.Color.fromArgb(PALE),"new world palette immediate");
         System.out.println("CLOUD_SKY_BLEND_PASS: "+palettes.size()*palettes.size()+" biome palette pairs match native sky weights, movement/stop/reversal, negative/vertical/diagonal boundaries, exact interiors, RGB independence and smooth alpha");
