@@ -2,7 +2,7 @@
 from pathlib import Path
 import zipfile,json
 ROOT=Path(__file__).resolve().parent.parent
-JAR=ROOT/'biome-cloud-transitions-fabric-1.21.1-1.0.1.jar'
+JAR=ROOT/'biome-cloud-transitions-fabric-1.21.1-1.0.2.jar'
 with zipfile.ZipFile(JAR) as z:
     assert 'dev/biomecloudtransitions/CloudBlend.class' in z.namelist()
     assert not any('CloudBlendCheck' in n for n in z.namelist())
